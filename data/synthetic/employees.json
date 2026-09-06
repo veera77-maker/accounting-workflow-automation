@@ -1,0 +1,44 @@
+[
+  {
+    "employee_id": "EMP-101",
+    "name": "Alice Johnson",
+    "client_id": "TV-001",
+    "department": "Engineering",
+    "role": "Senior Developer"
+  },
+  {
+    "employee_id": "EMP-102",
+    "name": "Bob Williams",
+    "client_id": "TV-001",
+    "department": "Sales",
+    "role": "Account Executive"
+  },
+  {
+    "employee_id": "EMP-103",
+    "name": "Carol Martinez",
+    "client_id": "GL-002",
+    "department": "Operations",
+    "role": "Plant Manager"
+  },
+  {
+    "employee_id": "EMP-104",
+    "name": "David Lee",
+    "client_id": "GL-002",
+    "department": "Procurement",
+    "role": "Procurement Specialist"
+  },
+  {
+    "employee_id": "EMP-105",
+    "name": "Eva Thompson",
+    "client_id": "PC-003",
+    "department": "Consulting",
+    "role": "Senior Consultant"
+  },
+  {
+    "employee_id": "EMP-106",
+    "name": "Frank Garcia",
+    "client_id": "PC-003",
+    "department": "Administration",
+    "role": "Office Manager"
+  }
+]

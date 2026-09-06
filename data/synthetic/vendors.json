@@ -1,0 +1,110 @@
+[
+  {
+    "vendor_id": "V-001",
+    "name": "Delta Airlines",
+    "category": "Travel",
+    "typical_amount_range": [200, 2000]
+  },
+  {
+    "vendor_id": "V-002",
+    "name": "Hilton Hotels",
+    "category": "Travel",
+    "typical_amount_range": [100, 500]
+  },
+  {
+    "vendor_id": "V-003",
+    "name": "Uber Technologies",
+    "category": "Travel",
+    "typical_amount_range": [15, 150]
+  },
+  {
+    "vendor_id": "V-004",
+    "name": "The Capital Grille",
+    "category": "Meals & Entertainment",
+    "typical_amount_range": [50, 500]
+  },
+  {
+    "vendor_id": "V-005",
+    "name": "Chipotle Mexican Grill",
+    "category": "Meals & Entertainment",
+    "typical_amount_range": [8, 30]
+  },
+  {
+    "vendor_id": "V-006",
+    "name": "Starbucks",
+    "category": "Meals & Entertainment",
+    "typical_amount_range": [4, 25]
+  },
+  {
+    "vendor_id": "V-007",
+    "name": "Microsoft Corporation",
+    "category": "Software",
+    "typical_amount_range": [20, 500]
+  },
+  {
+    "vendor_id": "V-008",
+    "name": "Salesforce",
+    "category": "Software",
+    "typical_amount_range": [100, 2000]
+  },
+  {
+    "vendor_id": "V-009",
+    "name": "Staples",
+    "category": "Office Supplies",
+    "typical_amount_range": [10, 300]
+  },
+  {
+    "vendor_id": "V-010",
+    "name": "Amazon Business",
+    "category": "Office Supplies",
+    "typical_amount_range": [15, 500]
+  },
+  {
+    "vendor_id": "V-011",
+    "name": "Deloitte Consulting",
+    "category": "Professional Services",
+    "typical_amount_range": [500, 10000]
+  },
+  {
+    "vendor_id": "V-012",
+    "name": "Baker & McKenzie LLP",
+    "category": "Professional Services",
+    "typical_amount_range": [1000, 15000]
+  },
+  {
+    "vendor_id": "V-013",
+    "name": "Comcast Business",
+    "category": "Utilities",
+    "typical_amount_range": [50, 500]
+  },
+  {
+    "vendor_id": "V-014",
+    "name": "Pacific Gas & Electric",
+    "category": "Utilities",
+    "typical_amount_range": [100, 1000]
+  },
+  {
+    "vendor_id": "V-015",
+    "name": "Google Ads",
+    "category": "Marketing",
+    "typical_amount_range": [200, 5000]
+  },
+  {
+    "vendor_id": "V-016",
+    "name": "Meta Business",
+    "category": "Marketing",
+    "typical_amount_range": [100, 3000]
+  },
+  {
+    "vendor_id": "V-017",
+    "name": "Office Depot",
+    "category": "Office Supplies",
+    "typical_amount_range": [20, 200]
+  },
+  {
+    "vendor_id": "V-NEW-001",
+    "name": "CloudNine Hosting",
+    "category": "Software",
+    "typical_amount_range": [50, 300]
+  }
+]

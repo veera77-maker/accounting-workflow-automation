@@ -1,0 +1,82 @@
+{
+  "total": {
+    "runs": 10,
+    "min_ms": 6.622,
+    "max_ms": 8.687,
+    "mean_ms": 7.294,
+    "median_ms": 7.235,
+    "total_ms": 72.939
+  },
+  "expense_processing": {
+    "runs": 10,
+    "min_ms": 2.216,
+    "max_ms": 3.258,
+    "mean_ms": 2.453,
+    "median_ms": 2.353,
+    "total_ms": 24.533
+  },
+  "receipt_processing": {
+    "runs": 10,
+    "min_ms": 0.19,
+    "max_ms": 0.274,
+    "mean_ms": 0.224,
+    "median_ms": 0.224,
+    "total_ms": 2.243
+  },
+  "parallel_stage": {
+    "runs": 10,
+    "min_ms": 3.408,
+    "max_ms": 5.061,
+    "mean_ms": 4.019,
+    "median_ms": 4.09,
+    "total_ms": 40.189
+  },
+  "reconciliation": {
+    "runs": 10,
+    "min_ms": 0.106,
+    "max_ms": 0.127,
+    "mean_ms": 0.115,
+    "median_ms": 0.113,
+    "total_ms": 1.155
+  },
+  "categorization": {
+    "runs": 10,
+    "min_ms": 0.115,
+    "max_ms": 0.146,
+    "mean_ms": 0.126,
+    "median_ms": 0.124,
+    "total_ms": 1.263
+  },
+  "anomaly_detection": {
+    "runs": 10,
+    "min_ms": 0.109,
+    "max_ms": 0.13,
+    "mean_ms": 0.116,
+    "median_ms": 0.116,
+    "total_ms": 1.165
+  },
+  "ledger_posting": {
+    "runs": 10,
+    "min_ms": 0.067,
+    "max_ms": 0.08,
+    "mean_ms": 0.072,
+    "median_ms": 0.073,
+    "total_ms": 0.723
+  },
+  "pl_generation": {
+    "runs": 10,
+    "min_ms": 0.041,
+    "max_ms": 0.05,
+    "mean_ms": 0.044,
+    "median_ms": 0.044,
+    "total_ms": 0.441
+  },
+  "client_summary": {
+    "runs": 10,
+    "min_ms": 0.111,
+    "max_ms": 0.135,
+    "mean_ms": 0.118,
+    "median_ms": 0.118,
+    "total_ms": 1.18
+  }
+}

@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "a05_1-workflow-agent"
+version = "0.1.0"
+description = "A.05.1 — Workflow Automation Agent for Accounting / Finance"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0",
+    "openpyxl>=3.1",
+    "pandas>=2.0",
+    "scikit-learn>=1.3",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

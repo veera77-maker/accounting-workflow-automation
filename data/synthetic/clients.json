@@ -1,0 +1,26 @@
+[
+  {
+    "client_id": "TV-001",
+    "name": "TechVista Inc.",
+    "contact": "Sarah Chen",
+    "email": "sarah.chen@techvista.example.com",
+    "industry": "Technology",
+    "monthly_budget_limit": 50000.00
+  },
+  {
+    "client_id": "GL-002",
+    "name": "GreenLeaf Manufacturing",
+    "contact": "James Porter",
+    "email": "j.porter@greenleaf.example.com",
+    "industry": "Manufacturing",
+    "monthly_budget_limit": 75000.00
+  },
+  {
+    "client_id": "PC-003",
+    "name": "Pinnacle Consulting",
+    "contact": "Maria Rodriguez",
+    "email": "mrodriguez@pinnacle.example.com",
+    "industry": "Consulting",
+    "monthly_budget_limit": 40000.00
+  }
+]
