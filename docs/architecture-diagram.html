@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monthly Expense Reconciliation Workflow</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #eef2f7;
+  --surface: #ffffff;
+  --surface-alt: #f8fafc;
+  --border: #cbd5e1;
+  --border-light: #e2e8f0;
+  --border-strong: #94a3b8;
+  --text: #0f172a;
+  --text-muted: #475569;
+  --text-subtle: #64748b;
+  
+  --rules: #0f766e;
+  --rules-bg: #f0fdfa;
+  --rules-border: #99f6e4;
+  
+  --statistical: #c2410c;
+  --statistical-bg: #fff7ed;
+  --statistical-border: #fed7aa;
+  
+  --human: #b91c1c;
+  --human-bg: #fef2f2;
+  --human-border: #fca5a5;
+  
+  --llm: #6d28d9;
+  --llm-bg: #f5f3ff;
+  --llm-border: #d8b4fe;
+  
+  --tools: #0369a1;
+  --tools-bg: #f0f9ff;
+  --tools-border: #bae6fd;
+  
+  --delivered: #15803d;
+  --delivered-bg: #f0fdf4;
+  --delivered-border: #bbf7d0;
+
+  --accent: #2563eb;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --radius: 8px;
+  --radius-sm: 4px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #eef2f7;
+  color: var(--text);
+  line-height: 1.5;
+  padding: 0;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 10px;
+  background: var(--accent);
+  color: #ffffff;
+  padding: 6px 12px;
+  z-index: 9999;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  transition: top 0.2s;
+}
+.skip-link:focus { top: 10px; }
+
+/* Header */
+header {
+  background: transparent;
+  border-bottom: 0;
+  padding: 1.5rem 1rem 0;
+  text-align: center;
+}
+
+.header-container {
+  max-width: 960px;
+  margin: 0 auto;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  padding: 1.5rem 1rem;
+}
+
+header h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 0.35rem;
+}
+
+.description {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  max-width: 720px;
+  margin: 0 auto 0.75rem auto;
+}
+
+.meta-tags {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.meta-pill {
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--surface-alt);
+  border: 1px solid var(--border-light);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  color: var(--text-muted);
+}
+
+/* Main Container */
+.container {
+  max-width: 960px;
+  margin: 0 auto 1.5rem;
+  padding: 1.5rem 1rem 3rem 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+}
+
+/* Filter Bar */
+.filter-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 0.25rem;
+}
+
+.filter-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filter-btn:hover {
+  background: var(--surface-alt);
+}
+
+.filter-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.filter-btn.active {
+  background: var(--text);
+  border-color: var(--text);
+  color: #ffffff;
+}
+
+.filter-btn[data-type="rules"].active { background: var(--rules); border-color: var(--rules); }
+.filter-btn[data-type="statistical"].active { background: var(--statistical); border-color: var(--statistical); }
+.filter-btn[data-type="human"].active { background: var(--human); border-color: var(--human); }
+.filter-btn[data-type="llm"].active { background: var(--llm); border-color: var(--llm); }
+.filter-btn[data-type="tools"].active { background: var(--tools); border-color: var(--tools); }
+
+/* Stages & Layout */
+.workflow-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.stage-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+  position: relative;
+}
+
+.stage-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 0.5rem;
+}
+
+.stage-badge {
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.05em;
+  border: 1px solid var(--border-light);
+}
+
+.stage-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.stage-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+/* Inter-stage flow arrow */
+.stage-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: -0.5rem 0;
+  z-index: 2;
+}
+
+.stage-arrow-stem {
+  width: 2px;
+  height: 16px;
+  background: var(--border-strong);
+}
+
+.stage-arrow-head {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--border-strong);
+}
+
+.flow-arrow-sm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-subtle);
+  margin: 0.6rem 0;
+}
+
+.flow-arrow-sm span.arrow-symbol {
+  font-size: 1rem;
+  color: var(--border-strong);
+  line-height: 1;
+}
+
+/* Component Cards (.node) */
+.node {
+  background: #455b76;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  position: relative;
+  text-align: left;
+}
+
+.node:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.node:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.node.dimmed {
+  opacity: 0.22;
+  filter: grayscale(0.85);
+  pointer-events: none;
+}
+
+.node-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.node-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.node-desc {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  line-height: 1.35;
+}
+
+.node-subtext {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: 0.35rem;
+  font-style: italic;
+}
+
+/* Type Tags */
+.type-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.tag-rules { background: var(--rules-bg); color: var(--rules); border: 1px solid var(--rules-border); }
+.tag-stat { background: var(--statistical-bg); color: var(--statistical); border: 1px solid var(--statistical-border); }
+.tag-human { background: var(--human-bg); color: var(--human); border: 1px solid var(--human-border); }
+.tag-llm { background: var(--llm-bg); color: var(--llm); border: 1px solid var(--llm-border); }
+.tag-tools { background: var(--tools-bg); color: var(--tools); border: 1px solid var(--tools-border); }
+.tag-delivered { background: var(--delivered-bg); color: var(--delivered); border: 1px solid var(--delivered-border); }
+
+/* Theming per component type */
+.node[data-types*="rules"] { border-color: var(--rules-border); }
+.node[data-types*="statistical"] { border-color: var(--statistical-border); }
+.node[data-types*="human"] { border-color: var(--human-border); background: #455b76; }
+.node[data-types*="tools"] { border-color: var(--tools-border); }
+.node[data-types*="delivered"] { border-color: var(--delivered-border); background: #455b76; }
+
+/* LLM node — visually distinct, dashed border, not dominating */
+.node[data-types="llm"] {
+  border: 2px dashed var(--llm);
+  background: #455b76;
+}
+
+/* Human node — visually prominent safeguard */
+.node-human-prominent {
+  border: 2px solid var(--human);
+  box-shadow: 0 0 0 1px var(--human-border);
+}
+
+/* Stage A: Inputs Grid */
+.inputs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.trigger-wrapper {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.sync-barrier-card {
+  background: #302b0f;
+  border: 1.5px dashed #c7961a;
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  margin-top: 0.75rem;
+  text-align: center;
+}
+
+.sync-badge {
+  display: inline-block;
+  background: #ca8a04;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.sync-desc {
+  font-size: 0.8rem;
+  color: #fde68a;
+  font-weight: 600;
+}
+
+.sync-note {
+  font-size: 0.72rem;
+  color: #fcd34d;
+  margin-top: 0.2rem;
+}
+
+/* Stage B & D & E: Vertical Pipeline Flow */
+.pipeline-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Stage C: Decision Section */
+.verdict-header {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.6rem 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.verdict-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.verdict-options {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.verdict-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+}
+
+.verdict-normal { background: var(--rules-bg); color: var(--rules); border: 1px solid var(--rules-border); }
+.verdict-review { background: var(--human-bg); color: var(--human); border: 1px solid var(--human-border); }
+
+/* Routing 2-Column Grid */
+.routing-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Normal Column */
+.normal-column {
+  background: var(--rules-bg);
+  border: 1.5px solid var(--rules-border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.column-header-normal {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.normal-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--rules);
+}
+
+.normal-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-bottom: 1rem;
+}
+
+.bypass-visual {
+  background: var(--surface);
+  border: 1px dashed var(--rules);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem;
+  text-align: center;
+  margin-top: auto;
+}
+
+.bypass-text {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--rules);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bypass-sub {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.bypass-arrow-down {
+  font-size: 1.1rem;
+  color: var(--rules);
+  font-weight: 700;
+  line-height: 1;
+  margin-top: 0.3rem;
+}
+
+/* Review Column */
+.review-column {
+  background: var(--surface-alt);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.review-col-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.review-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--human);
+}
+
+/* Review Action Box */
+.decision-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* Outcomes 3-Col Grid */
+.outcomes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+
+.outcome-card {
+  background: #455b76;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+  min-height: 130px;
+}
+
+.outcome-pill {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+  display: inline-block;
+}
+
+.pill-approve { background: var(--rules-bg); color: var(--rules); border: 1px solid var(--rules-border); }
+.pill-correct { background: var(--tools-bg); color: var(--tools); border: 1px solid var(--tools-border); }
+.pill-reject { background: var(--human-bg); color: var(--human); border: 1px solid var(--human-border); }
+
+.outcome-desc {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+  margin-bottom: 0.5rem;
+}
+
+.outcome-card .outcome-desc {
+  color: #cbd5e1;
+}
+
+.outcome-destination {
+  margin-top: auto;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--border-light);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.dest-ledger {
+  color: var(--rules);
+}
+
+.outcome-card .dest-ledger {
+  color: #5eead4;
+}
+
+.dest-terminate {
+  color: var(--human);
+  background: #3d1e26;
+  border: 1px dashed var(--human);
+  padding: 0.3rem 0.2rem;
+  border-radius: var(--radius-sm);
+}
+
+.outcome-card .dest-terminate {
+  color: #fca5a5;
+}
+
+.terminate-bold {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+/* Convergence Bar */
+.convergence-bar {
+  background: #10362d;
+  border: 1.5px solid #2d896c;
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  text-align: center;
+}
+
+.conv-heading {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #86efac;
+  margin-bottom: 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.conv-stream-tags {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+
+.conv-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: #173f35;
+  border: 1px solid #3c9f7e;
+  color: #a7f3d0;
+}
+
+.conv-operator {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #86efac;
+}
+
+.conv-note {
+  font-size: 0.72rem;
+  color: #a7f3d0;
+  line-height: 1.35;
+}
+
+.conv-note strong {
+  color: var(--human);
+}
+
+/* LLM Boundary Box */
+.llm-boundary-box {
+  background: #223247;
+  border: 1px solid var(--llm-border);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.llm-boundary-title {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #c4b5fd;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.llm-boundary-desc {
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  line-height: 1.35;
+}
+
+.llm-boundary-desc strong {
+  color: #f1f5f9;
+}
+
+/* Evidence Summary Section */
+.evidence-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-top: 2rem;
+  box-shadow: var(--shadow);
+}
+
+.evidence-header {
+  margin-bottom: 1rem;
+}
+
+.evidence-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.evidence-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.metric-card {
+  background: var(--surface-alt);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 1rem 0.5rem;
+  text-align: center;
+}
+
+.metric-val {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1.1;
+  margin-bottom: 0.25rem;
+}
+
+.metric-lbl {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+}
+
+.disclaimers-card {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.disclaimer-heading {
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+}
+
+.disclaimers-card ul {
+  padding-left: 1.2rem;
+  margin: 0;
+}
+
+.disclaimers-card li {
+  margin-bottom: 0.35rem;
+}
+
+.disclaimers-card strong {
+  color: var(--text);
+}
+
+/* Modal Overlay & Detail Panel */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(2px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  max-width: 580px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  position: relative;
+  border: 1px solid var(--border);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-subtle);
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+}
+
+.modal-close-btn:hover {
+  color: var(--text);
+  background: var(--surface-alt);
+}
+
+.modal-close-btn:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+.modal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding-right: 2rem;
+}
+
+.modal-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.detail-row {
+  margin-bottom: 0.85rem;
+}
+
+.detail-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-subtle);
+  margin-bottom: 0.2rem;
+}
+
+.detail-value {
+  font-size: 0.85rem;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.detail-value ul {
+  padding-left: 1.2rem;
+  margin-top: 0.25rem;
+}
+
+.detail-value li {
+  margin-bottom: 0.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 860px) {
+  .routing-grid {
+    grid-template-columns: 1fr;
+  }
+  .inputs-grid {
+    grid-template-columns: 1fr;
+  }
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .outcomes-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+
+<a href="#main-workflow" class="skip-link">Skip to architecture workflow</a>
+
+<header>
+  <div class="header-container">
+    <h1>Monthly Expense Reconciliation Workflow</h1>
+    <div class="subtitle">Trigger → Decision → Output Architecture</div>
+    <p class="description">
+      Monthly corporate expense reconciliation pipeline featuring deterministic file processing, rule-based reconciliation, statistical anomaly detection, human-in-the-loop exception handling, and fact-grounded LLM narrative summarization.
+    </p>
+    <div class="meta-tags">
+      <span class="meta-pill">Domain: Accounting / Finance (Case 3)</span>
+      <span class="meta-pill">Architectural Principle: Cheapest Trustworthy Component</span>
+      <span class="meta-pill">Scope: Scoped Local Prototype</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Component Type Filter -->
+  <div class="filter-bar" role="group" aria-label="Filter architecture components by assigned type">
+    <span class="filter-label">Filter:</span>
+    <button class="filter-btn active" data-type="all">All Components</button>
+    <button class="filter-btn" data-type="rules">Rules</button>
+    <button class="filter-btn" data-type="statistical">Statistical</button>
+    <button class="filter-btn" data-type="human">Human</button>
+    <button class="filter-btn" data-type="llm">LLM</button>
+    <button class="filter-btn" data-type="tools">Tools</button>
+  </div>
+
+  <div id="main-workflow" class="workflow-wrapper">
+
+    <!-- ========================================== -->
+    <!-- STAGE A: INPUT & SYNCHRONIZATION -->
+    <!-- ========================================== -->
+    <section class="stage-section" id="stage-input" aria-label="Stage A: Input Processing and Concurrency Synchronization">
+      <div class="stage-header">
+        <span class="stage-badge">STAGE A</span>
+        <span class="stage-title">Input Ingestion &amp; Concurrency Synchronization</span>
+      </div>
+      <p class="stage-desc">
+        The monthly cycle triggers parallel data acquisition. Expense reports and receipt streams run concurrently and must synchronize before downstream processing.
+      </p>
+
+      <!-- Monthly Trigger -->
+      <div class="trigger-wrapper">
+        <div class="node" data-component="trigger" data-types="tools" tabindex="0" role="button" aria-label="Monthly Trigger — Component Type: Tools">
+          <div class="node-header">
+            <span class="node-name">Monthly Trigger</span>
+            <span class="type-tag tag-tools">Tools</span>
+          </div>
+          <div class="node-desc">Scheduled job initializes WorkflowRun with unique run ID, client ID, accounting month, and input file paths.</div>
+          <div class="node-subtext">Pure deterministic tool orchestration</div>
+        </div>
+      </div>
+
+      <div class="flow-arrow-sm" aria-hidden="true">
+        <span class="arrow-symbol">↓</span> Launches independent input workers in parallel
+      </div>
+
+      <!-- Parallel Input Workers -->
+      <div class="inputs-grid">
+        <div class="node" data-component="expense" data-types="rules,tools" tabindex="0" role="button" aria-label="Expense Processing — Component Type: Rules plus Tools">
+          <div class="node-header">
+            <span class="node-name">Expense Processing</span>
+            <span class="type-tag tag-rules">Rules + Tools</span>
+          </div>
+          <div class="node-desc">Reads client Excel file (.xlsx); validates record schema, positive amounts, valid employee IDs, and known category codes.</div>
+          <div class="node-subtext">ThreadPool Worker 1 · Deterministic openpyxl parsing</div>
+        </div>
+
+        <div class="node" data-component="receipt" data-types="rules,tools" tabindex="0" role="button" aria-label="Receipt Processing — Component Type: Rules plus Tools">
+          <div class="node-header">
+            <span class="node-name">Receipt Processing</span>
+            <span class="type-tag tag-rules">Rules + Tools</span>
+          </div>
+          <div class="node-desc">Parses structured JSON receipt data; extracts receipt IDs, vendor strings, line item details, and taxes.</div>
+          <div class="node-subtext">ThreadPool Worker 2 · Structured JSON input (Real OCR is a future integration boundary)</div>
+        </div>
+      </div>
+
+      <!-- WAIT FOR BOTH Synchronization Barrier -->
+      <div class="sync-barrier-card">
+        <div class="sync-badge">WAIT FOR BOTH</div>
+        <div class="sync-desc">Synchronization Gate: ThreadPoolExecutor waits until BOTH streams finish before proceeding.</div>
+        <div class="sync-note">Reconciliation cannot proceed with partial data. Parallel execution is an engineering implementation decision.</div>
+      </div>
+    </section>
+
+    <!-- Stage Connector -->
+    <div class="stage-connector" aria-hidden="true">
+      <div class="stage-arrow-stem"></div>
+      <div class="stage-arrow-head"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- STAGE B: DETERMINISTIC PIPELINE -->
+    <!-- ========================================== -->
+    <section class="stage-section" id="stage-deterministic" aria-label="Stage B: Deterministic Decision Pipeline">
+      <div class="stage-header">
+        <span class="stage-badge">STAGE B</span>
+        <span class="stage-title">Deterministic Decision Pipeline</span>
+      </div>
+      <p class="stage-desc">
+        High-trust, low-cost deterministic calculations. No LLM or ML models are used where explicit rules and statistical checks provide deterministic, auditable decisions.
+      </p>
+
+      <div class="pipeline-flow">
+        <!-- Reconciliation -->
+        <div class="node" data-component="reconciliation" data-types="rules" tabindex="0" role="button" aria-label="Reconciliation — Component Type: Rules">
+          <div class="node-header">
+            <span class="node-name">Reconciliation</span>
+            <span class="type-tag tag-rules">Rules</span>
+          </div>
+          <div class="node-desc">Matches expense records against receipts using normalized vendor strings (strips corporate suffixes) and ±$0.01 tolerance comparison.</div>
+          <div class="node-subtext">Verdicts: EXACT_MATCH · AMOUNT_MISMATCH · VENDOR_MISMATCH · MISSING_RECEIPT</div>
+        </div>
+
+        <div class="flow-arrow-sm" aria-hidden="true">
+          <span class="arrow-symbol">↓</span> Reconciled dataset feeds categorization
+        </div>
+
+        <!-- Categorization -->
+        <div class="node" data-component="categorization" data-types="rules" tabindex="0" role="button" aria-label="Categorization — Component Type: Rules">
+          <div class="node-header">
+            <span class="node-name">Categorization</span>
+            <span class="type-tag tag-rules">Rules</span>
+          </div>
+          <div class="node-desc">Assigns standard 7-category taxonomy using deterministic vendor lookup, fuzzy vendor matching where applicable, and fallback keyword matching.</div>
+          <div class="node-subtext">Taxonomy: Travel, Meals, Software, Supplies, Utilities, Marketing, Professional Services (No ML model used)</div>
+        </div>
+
+        <div class="flow-arrow-sm" aria-hidden="true">
+          <span class="arrow-symbol">↓</span> Categorized records feed anomaly detection
+        </div>
+
+        <!-- Anomaly Detection -->
+        <div class="node" data-component="anomaly" data-types="rules,statistical" tabindex="0" role="button" aria-label="Anomaly Detection — Component Type: Rules plus Statistical">
+          <div class="node-header">
+            <span class="node-name">Anomaly Detection</span>
+            <span class="type-tag tag-stat">Rules + Statistical</span>
+          </div>
+          <div class="node-desc">Scans categorized expenses for policy violations and statistical outliers. Determines routing verdict (NORMAL vs. REVIEW).</div>
+          <div class="node-subtext">Implemented Signals: HIGH_VALUE (category mean × 3.0, with minimum sample threshold) · DUPLICATE (hash match) · NEW_VENDOR (lookup) · RECONCILIATION_MISMATCH</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stage Connector -->
+    <div class="stage-connector" aria-hidden="true">
+      <div class="stage-arrow-stem"></div>
+      <div class="stage-arrow-head"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- STAGE C: EXCEPTION HANDLING (DECISION SECTION) -->
+    <!-- ========================================== -->
+    <section class="stage-section" id="stage-exceptions" aria-label="Stage C: Exception Handling and Human Review Routing">
+      <div class="stage-header">
+        <span class="stage-badge">STAGE C</span>
+        <span class="stage-title">Exception Handling &amp; Human-in-the-Loop Safeguard</span>
+      </div>
+      <p class="stage-desc">
+        Routing boundary: clean expenses automatically proceed to the ledger. Items with detected anomalies route to a human accountant for explicit resolution.
+      </p>
+
+      <!-- Verdict Banner -->
+      <div class="verdict-header">
+        <span class="verdict-title">⚖️ Anomaly Routing Verdict</span>
+        <div class="verdict-options">
+          <span class="verdict-tag verdict-normal">Clean → NORMAL</span>
+          <span class="verdict-tag verdict-review">Flagged → REVIEW</span>
+        </div>
+      </div>
+
+      <!-- Two Paths Grid: Normal vs. Review -->
+      <div class="routing-grid">
+        
+        <!-- NORMAL (Clean Path) -->
+        <div class="normal-column">
+          <div>
+            <div class="column-header-normal">
+              <span class="normal-title">✓ NORMAL PATH (Clean)</span>
+            </div>
+            <p class="normal-desc">
+              Transactions with zero anomaly flags. Validated amounts, confirmed receipts, and standard category assignments require no manual intervention.
+            </p>
+          </div>
+
+          <div class="bypass-visual">
+            <div class="bypass-text">Bypasses Human Review</div>
+            <div class="bypass-sub">Direct route to ledger posting</div>
+            <div class="bypass-arrow-down" aria-hidden="true">↓</div>
+          </div>
+        </div>
+
+        <!-- REVIEW (Exception Path) -->
+        <div class="review-column">
+          <div class="review-col-header">
+            <span class="review-title">⚠️ REVIEW PATH (Human-in-the-Loop)</span>
+          </div>
+
+          <!-- Human Review Node -->
+          <div class="node node-human-prominent" data-component="review" data-types="human" tabindex="0" role="button" aria-label="Human Review — Component Type: Human">
+            <div class="node-header">
+              <span class="node-name">Human Review</span>
+              <span class="type-tag tag-human">Human Safeguard</span>
+            </div>
+            <div class="node-desc">Human accountant inspects flagged transaction with full anomaly evidence and discrepancy reasons.</div>
+            <div class="node-subtext">Deliberate human automation boundary — financial accountability</div>
+          </div>
+
+          <!-- Decision Node -->
+          <div class="decision-box">
+            <span>Accountant Action: Three Mutually Exclusive Resolutions</span>
+          </div>
+
+          <!-- Three Outcomes Grid -->
+          <div class="outcomes-grid">
+            <!-- APPROVE -->
+            <div class="outcome-card">
+              <div>
+                <span class="outcome-pill pill-approve">APPROVE</span>
+                <p class="outcome-desc">Accepts transaction as legitimate business expense without changes.</p>
+              </div>
+              <div class="outcome-destination dest-ledger">
+                ↓ Proceeds to Ledger
+              </div>
+            </div>
+
+            <!-- CORRECT -->
+            <div class="outcome-card">
+              <div>
+                <span class="outcome-pill pill-correct">CORRECT</span>
+                <p class="outcome-desc">Modifies amount, category, or vendor details to rectify discrepancy.</p>
+              </div>
+              <div class="outcome-destination dest-ledger">
+                ↓ Proceeds to Ledger
+              </div>
+            </div>
+
+            <!-- REJECT -->
+            <div class="outcome-card">
+              <div>
+                <span class="outcome-pill pill-reject">REJECT</span>
+                <p class="outcome-desc">Disallows transaction. Item permanently excluded from financial records.</p>
+              </div>
+              <div class="outcome-destination dest-terminate">
+                <span class="terminate-bold">🛑 TERMINATE</span>
+                NO Ledger Entry Generated
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Ledger Posting Convergence Bar -->
+      <div class="convergence-bar">
+        <div class="conv-heading">
+          <span>📥 LEDGER POSTING CONVERGENCE</span>
+        </div>
+        <div class="conv-stream-tags">
+          <span class="conv-tag">✓ Clean Normal Path</span>
+          <span class="conv-operator">+</span>
+          <span class="conv-tag">✓ Approved Path</span>
+          <span class="conv-operator">+</span>
+          <span class="conv-tag">✓ Corrected Path</span>
+        </div>
+        <p class="conv-note">
+          Only validated transactions enter the accounting ledger. <strong>REJECTED transactions terminate upstream and have zero path to the ledger.</strong>
+        </p>
+      </div>
+
+    </section>
+
+    <!-- Stage Connector -->
+    <div class="stage-connector" aria-hidden="true">
+      <div class="stage-arrow-stem"></div>
+      <div class="stage-arrow-head"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- STAGE D: ACCOUNTING ENGINE -->
+    <!-- ========================================== -->
+    <section class="stage-section" id="stage-accounting" aria-label="Stage D: Accounting Engine">
+      <div class="stage-header">
+        <span class="stage-badge">STAGE D</span>
+        <span class="stage-title">Accounting Engine</span>
+      </div>
+      <p class="stage-desc">
+        Deterministic ledger posting and aggregation. Financial statements are derived strictly from posted ledger records.
+      </p>
+
+      <div class="pipeline-flow">
+        <!-- Ledger -->
+        <div class="node" data-component="ledger" data-types="rules,tools" tabindex="0" role="button" aria-label="Ledger — Component Type: Rules plus Tools">
+          <div class="node-header">
+            <span class="node-name">Ledger</span>
+            <span class="type-tag tag-rules">Rules + Tools</span>
+          </div>
+          <div class="node-desc">Posts approved, corrected, and clean normal transactions as LedgerEntry records with sequential entry IDs.</div>
+          <div class="node-subtext">Records source (AUTO vs. HUMAN_REVIEW), timestamp, and applied corrections</div>
+        </div>
+
+        <div class="flow-arrow-sm" aria-hidden="true">
+          <span class="arrow-symbol">↓</span> Ledger entries feed report aggregation
+        </div>
+
+        <!-- P&L Report -->
+        <div class="node" data-component="pl" data-types="rules" tabindex="0" role="button" aria-label="P&L Report — Component Type: Rules">
+          <div class="node-header">
+            <span class="node-name">P&amp;L Report</span>
+            <span class="type-tag tag-rules">Rules</span>
+          </div>
+          <div class="node-desc">Deterministic financial aggregation: sums entries by category for client &amp; month. Generates line items and verifiable total.</div>
+          <div class="node-subtext">Pure deterministic arithmetic: Sum(Line Items) == Total · Financial Source of Truth</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stage Connector -->
+    <div class="stage-connector" aria-hidden="true">
+      <div class="stage-arrow-stem"></div>
+      <div class="stage-arrow-head"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- STAGE E: COMMUNICATION & NARROW LLM -->
+    <!-- ========================================== -->
+    <section class="stage-section" id="stage-communication" aria-label="Stage E: Client Communication and Narrow LLM Scope">
+      <div class="stage-header">
+        <span class="stage-badge">STAGE E</span>
+        <span class="stage-title">Client Communication &amp; Narrowly Scoped LLM</span>
+      </div>
+      <p class="stage-desc">
+        Strict separation of concerns: calculations are deterministic; the LLM is restricted exclusively to natural-language narrative synthesis.
+      </p>
+
+      <div class="pipeline-flow">
+        <!-- Client Summary [LLM] -->
+        <div class="node" data-component="summary" data-types="llm" tabindex="0" role="button" aria-label="Client Summary [LLM] — Component Type: LLM (Natural Language Generation Only)">
+          <div class="node-header">
+            <span class="node-name">Client Summary [LLM]</span>
+            <span class="type-tag tag-llm">LLM (NLG Only)</span>
+          </div>
+          <div class="node-desc">Generates professional executive narrative summarizing financial trends and category highlights for client leadership.</div>
+
+          <div class="llm-boundary-box">
+            <div class="llm-boundary-title">🔒 Scoped LLM Automation Boundary</div>
+            <div class="llm-boundary-desc">
+              Receives validated P&amp;L as input facts. The LLM <strong>NEVER</strong> calculates sums, categorizes expenses, reconciles receipts, detects anomalies, modifies ledger records, or makes approval decisions. Summary is checked for grounded financial facts.
+            </div>
+            <div class="node-subtext">Prototype uses deterministic FakeLLMClient with zero external API calls ($0 API cost)</div>
+          </div>
+        </div>
+
+        <div class="flow-arrow-sm" aria-hidden="true">
+          <span class="arrow-symbol">↓</span> Verified client deliverables package
+        </div>
+
+        <!-- Client Output -->
+        <div class="node" data-component="output" data-types="tools" tabindex="0" role="button" aria-label="Client Output — Component Type: Delivered">
+          <div class="node-header">
+            <span class="node-name">Client Output</span>
+            <span class="type-tag tag-delivered">Output Package</span>
+          </div>
+          <div class="node-desc">Financial reconciliation deliverable package: Executive Narrative + Structured P&amp;L Statement.</div>
+          <div class="node-subtext">Prototype output generated from validated workflow results</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- EVIDENCE SUMMARY & EMPIRICAL METRICS -->
+  <!-- ========================================== -->
+  <section class="evidence-section" aria-label="Evidence Portfolio Empirical Metrics">
+    <div class="evidence-header">
+      <h2 class="evidence-title">Empirical Evidence &amp; Verification Summary</h2>
+      <p class="evidence-subtitle">Portfolio Artifact A.05.1 verification metrics derived from automated testing suite and benchmark runs.</p>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-val">298</div>
+        <div class="metric-lbl">Automated Tests Passed</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val">6</div>
+        <div class="metric-lbl">End-to-End Scenarios</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val">10</div>
+        <div class="metric-lbl">Benchmark Runs</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val">10.822 ms</div>
+        <div class="metric-lbl">Mean Prototype Latency</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val">0</div>
+        <div class="metric-lbl">External LLM API Calls</div>
+      </div>
+    </div>
+
+    <div class="disclaimers-card">
+      <div class="disclaimer-heading">Technical Scope &amp; Empirical Disclaimers</div>
+      <ul>
+        <li><strong>Latency Measurement:</strong> 10.822 ms is a local prototype measurement on synthetic data using ThreadPoolExecutor, <strong>NOT production latency</strong>. Production latency will depend on database transit, network overhead, and real data volumes.</li>
+        <li><strong>LLM Cost:</strong> The prototype utilizes <code>FakeLLMClient</code> and makes zero external API calls ($0 external spend). Production LLM cost has not been measured and will depend on provider token pricing and caching.</li>
+        <li><strong>Dataset Scope:</strong> This is a local engineering prototype using synthetic accounting datasets. It does not represent production deployment, production cost, customer validation, or ROI claims.</li>
+        <li><strong>Receipt Processing (OCR Boundary):</strong> The current prototype processes structured JSON receipt data. Real OCR is a future integration boundary and is <strong>NOT implemented</strong>.</li>
+        <li><strong>Categorization Implementation:</strong> Implemented via deterministic vendor table lookup and keyword rules. There is <strong>NO trained ML categorization model</strong> in this artifact.</li>
+        <li><strong>Anomaly Signals:</strong> Explicitly implements four deterministic/statistical signals: <code>HIGH_VALUE</code> (category mean × 3.0, with minimum sample threshold), <code>DUPLICATE</code>, <code>NEW_VENDOR</code>, and <code>RECONCILIATION_MISMATCH</code>.</li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+
+<!-- ========================================== -->
+<!-- COMPONENT DETAIL MODAL -->
+<!-- ========================================== -->
+<div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-label="Component Technical Specification">
+  <div class="modal-card" id="modal-card">
+    <button class="modal-close-btn" id="modal-close-btn" aria-label="Close component detail dialog">&times;</button>
+    <div class="modal-title-row">
+      <h3 class="modal-name" id="modal-name">Component Name</h3>
+      <span class="type-tag" id="modal-type-badge">Type</span>
+    </div>
+    
+    <div class="detail-row">
+      <div class="detail-label">Decision &amp; Responsibility</div>
+      <div class="detail-value" id="modal-responsibility"></div>
+    </div>
+
+    <div class="detail-row">
+      <div class="detail-label">Component Assignment Rationale</div>
+      <div class="detail-value" id="modal-why"></div>
+    </div>
+
+    <div class="detail-row">
+      <div class="detail-label">LLM Boundary Status</div>
+      <div class="detail-value" id="modal-llm"></div>
+    </div>
+
+    <div class="detail-row">
+      <div class="detail-label">Automated Test Evidence</div>
+      <div class="detail-value" id="modal-evidence"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var COMPONENTS = {
+  trigger: {
+    name: "Monthly Trigger",
+    type: "Tools",
+    typeClass: "tools",
+    responsibility: "Initiates the monthly workflow by generating a WorkflowRun with a unique ID, client ID, month, and file paths for expense and receipt data.",
+    why: "File system operations (generating Excel and JSON files) are deterministic tool calls with no ambiguity. No decision-making required — pure orchestration.",
+    llm: "No",
+    evidence: [
+      "TriggerTest: creates WorkflowRun with unique ID",
+      "TriggerTest: generates expense Excel and receipt JSON",
+      "TriggerTest: unknown client raises error",
+      "Synthetic data only — no real financial data used"
+    ]
+  },
+  expense: {
+    name: "Expense Processing",
+    type: "Rules + Tools",
+    typeClass: "rules",
+    responsibility: "Reads the Excel expense file, validates each record (amount >= 0, known category, valid employee), and produces a list of ExpenseRecord objects with expense IDs.",
+    why: "Deterministic file parsing (openpyxl) combined with validation rules. No ambiguity — each row maps to a record via fixed schema and known categories.",
+    llm: "No",
+    evidence: [
+      "test_expense_processor.py: 12 tests — all passing",
+      "Validates: amount, category, employee fields",
+      "Rejects: negative amounts, unknown categories, missing fields",
+      "Processes synthetic expense data only"
+    ]
+  },
+  receipt: {
+    name: "Receipt Processing",
+    type: "Rules + Tools",
+    typeClass: "rules",
+    responsibility: "Reads the JSON receipt file, extracts line items, and produces a list of ReceiptRecord objects with receipt IDs and vendor info.",
+    why: "Structured JSON parsing with schema validation. No OCR or image processing — the current prototype processes structured receipt data. Real OCR is a future integration boundary.",
+    llm: "No",
+    evidence: [
+      "test_receipt_processor.py: 12 tests — all passing",
+      "Extracts: receipt_id, vendor, date, amount, line_items",
+      "Current prototype: structured JSON input only",
+      "Real OCR: not implemented — marked as future integration"
+    ]
+  },
+  reconciliation: {
+    name: "Reconciliation",
+    type: "Rules",
+    typeClass: "rules",
+    responsibility: "Matches each expense record against receipt records using vendor normalization and amount comparison. Produces a ReconciliationResult with status: EXACT_MATCH, AMOUNT_MISMATCH, VENDOR_MISMATCH, or MISSING_RECEIPT.",
+    why: "Deterministic string matching (normalize vendor, strip suffixes, fuzzy compare) and numeric comparison with tolerance. No ambiguity — each pair produces a clear verdict.",
+    llm: "No",
+    evidence: [
+      "test_reconciler.py: 23 tests — all passing",
+      "Signals: EXACT_MATCH, AMOUNT_MISMATCH, VENDOR_MISMATCH, MISSING_RECEIPT",
+      "Vendor normalization: strips Inc/LLC/LLP/Corp, lowercase, whitespace",
+      "Amount tolerance: +/- $0.01 considered match"
+    ]
+  },
+  categorization: {
+    name: "Categorization",
+    type: "Rules",
+    typeClass: "rules",
+    responsibility: "Assigns a category (Travel, Meals, Software, Office Supplies, Utilities, Marketing, Professional Services) to each expense using vendor lookup then keyword matching.",
+    why: "Deterministic mapping: vendor lookup first, fuzzy vendor matching where applicable, then keyword fallback on description. No trained ML model — pure rule-based classification.",
+    llm: "No",
+    evidence: [
+      "test_categorizer.py: 16 tests — all passing",
+      "Method: vendor_lookup -> keyword_match -> unknown",
+      "7 categories with defined keyword mappings",
+      "No ML model used — deterministic vendor/keyword rules only"
+    ]
+  },
+  anomaly: {
+    name: "Anomaly Detection",
+    type: "Rules + Statistical",
+    typeClass: "statistical",
+    responsibility: "Detects anomalies in categorized expenses using four signals: HIGH_VALUE (statistical threshold), DUPLICATE (exact match), NEW_VENDOR (lookup), RECONCILIATION_MISMATCH (from Reconciler).",
+    why: "Combines rule-based checks (duplicate, new vendor, reconciliation status) with a statistical threshold (category mean × 3.0, with a minimum sample threshold). Each signal is deterministic given the data.",
+    llm: "No",
+    evidence: [
+      "test_anomaly_detector.py: 21 tests — all passing",
+      "Implemented signals: HIGH_VALUE, DUPLICATE, NEW_VENDOR, RECONCILIATION_MISMATCH",
+      "HIGH_VALUE: category mean × 3.0, with minimum sample threshold",
+      "All verdicts: NORMAL or REVIEW — deterministic"
+    ]
+  },
+  review: {
+    name: "Human Review",
+    type: "Human",
+    typeClass: "human",
+    responsibility: "A human accountant reviews flagged items and makes one of three decisions: APPROVE (post as-is), CORRECT (modify values then post), or REJECT (exclude from ledger).",
+    why: "Items flagged as REVIEW have genuine ambiguity that cannot be resolved by rules or ML. Human judgment is required for financial accuracy and accountability.",
+    llm: "No",
+    evidence: [
+      "test_review_queue.py: 15 tests — all passing",
+      "Decisions: APPROVE, CORRECT, REJECT",
+      "CORRECT supports: amount, category, vendor field changes",
+      "Decision, timestamp, and reason recorded"
+    ]
+  },
+  ledger: {
+    name: "Ledger",
+    type: "Rules + Tools",
+    typeClass: "rules",
+    responsibility: "Posts approved and corrected expenses as LedgerEntry records. REJECT decisions are excluded. Maintains the accounting ledger with entry IDs, categories, and amounts.",
+    why: "Deterministic posting: approved expenses become ledger entries with sequential IDs. No calculation ambiguity — amounts are taken directly from (possibly corrected) records.",
+    llm: "No",
+    evidence: [
+      "test_ledger.py: 19 tests — all passing",
+      "Posts: APPROVE (as-is), CORRECT (with corrected values)",
+      "Excludes: REJECT decisions",
+      "Entry fields: entry_id, category, amount, date, client, month"
+    ]
+  },
+  pl: {
+    name: "P&L Report",
+    type: "Rules",
+    typeClass: "rules",
+    responsibility: "Aggregates ledger entries by category to produce a Profit & Loss report with line items and totals. Filters by client and month.",
+    why: "Deterministic aggregation: SUM(amount) GROUP BY category. No ambiguity — pure arithmetic on ledger entries.",
+    llm: "No",
+    evidence: [
+      "test_pl_generator.py: 18 tests — all passing",
+      "Output: client_id, month, line_items (category + total), total",
+      "Totals verified: sum(line_items) = total",
+      "Deterministic: same input always produces same output"
+    ]
+  },
+  summary: {
+    name: "Client Summary",
+    type: "LLM",
+    typeClass: "llm",
+    responsibility: "Receives the validated P&L report and generates a natural-language summary for the client. The LLM is used ONLY for text generation — it does not calculate P&L, categorize, reconcile, detect anomalies, modify the ledger, or make human-review decisions.",
+    why: "Natural-language generation is the only task where LLM is the cheapest trustworthy component. All calculations and decisions are already made by deterministic components upstream.",
+    llm: "Yes — LLM used for natural-language generation only",
+    evidence: [
+      "test_client_summary.py: 30 tests — all passing",
+      "LLM role: natural-language generation of client-facing summary",
+      "LLM does NOT: calculate P&L, categorize, reconcile, detect anomalies, modify ledger, make review decisions",
+      "Prototype uses FakeLLMClient — zero external API calls",
+      "Grounding validation: summary must reference actual P&L data"
+    ]
+  },
+  output: {
+    name: "Client Output",
+    type: "Delivered",
+    typeClass: "delivered",
+    responsibility: "Financial reconciliation deliverable package: Executive Narrative + Structured P&L Statement.",
+    why: "Prototype output generated from validated workflow results.",
+    llm: "No",
+    evidence: [
+      "End-to-end demo Scenario A-F execution verified",
+      "Structured P&L statement verified against ledger totals",
+      "Workflow results serialized for prototype output"
+    ]
+  }
+};
+
+// Modal Handling
+function openDetail(c) {
+  var d = COMPONENTS[c];
+  if (!d) return;
+  
+  document.getElementById('modal-name').textContent = d.name;
+  
+  var b = document.getElementById('modal-type-badge');
+  b.textContent = d.type;
+  b.className = 'type-tag tag-' + d.typeClass;
+  
+  document.getElementById('modal-responsibility').textContent = d.responsibility;
+  document.getElementById('modal-why').textContent = d.why;
+  document.getElementById('modal-llm').textContent = d.llm;
+  
+  var evUl = '<ul>' + d.evidence.map(function(e){ return '<li>' + e + '</li>'; }).join('') + '</ul>';
+  document.getElementById('modal-evidence').innerHTML = evUl;
+  
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('modal-close-btn').focus();
+}
+
+function closeDetail() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// Click and Keyboard Listeners for Nodes
+document.querySelectorAll('.node[data-component]').forEach(function(n) {
+  n.addEventListener('click', function() {
+    openDetail(this.getAttribute('data-component'));
+  });
+  n.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openDetail(this.getAttribute('data-component'));
+    }
+  });
+});
+
+document.getElementById('modal-close-btn').addEventListener('click', closeDetail);
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeDetail();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeDetail();
+});
+
+// Component Type Filters
+document.querySelectorAll('.filter-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+    this.classList.add('active');
+    
+    var t = this.getAttribute('data-type');
+    document.querySelectorAll('.node[data-component]').forEach(function(n) {
+      var types = n.getAttribute('data-types') || '';
+      if (t === 'all' || types.indexOf(t) !== -1) {
+        n.classList.remove('dimmed');
+      } else {
+        n.classList.add('dimmed');
+      }
+    });
+  });
+});
+</script>
+
+</body>
+</html>
